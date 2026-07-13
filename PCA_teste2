@@ -1,0 +1,152 @@
+#include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+
+// Instancia o PCA9685 no endereço padrão
+Adafruit_PWMServoDriver pca9685 = Adafruit_PWMServoDriver(0x40);
+
+// Calibração dos servos (Mantenha os valores do seu teste)
+#define SERVOMIN 80
+#define SERVOMAX 600
+
+// ==========================================
+// DICIONÁRIO COMPLETO DO ALFABETO BRAILLE
+// (1 = Ativado/Came levanta o pino, 0 = Repouso)
+// Ordem dos canais no PCA: {0, 1, 2, 3, 4, 5}
+// ==========================================
+const int braille_A[6] = {1, 0, 0, 0, 0, 0}; 
+const int braille_B[6] = {1, 1, 0, 0, 0, 0}; 
+const int braille_C[6] = {1, 0, 0, 1, 0, 0}; 
+const int braille_D[6] = {1, 0, 0, 1, 1, 0}; 
+const int braille_E[6] = {1, 0, 0, 0, 1, 0}; 
+const int braille_F[6] = {1, 1, 0, 1, 0, 0}; 
+const int braille_G[6] = {1, 1, 0, 1, 1, 0}; 
+const int braille_H[6] = {1, 1, 0, 0, 1, 0}; 
+const int braille_I[6] = {0, 1, 0, 1, 0, 0}; 
+const int braille_J[6] = {0, 1, 0, 1, 1, 0}; 
+const int braille_K[6] = {1, 0, 1, 0, 0, 0}; 
+const int braille_L[6] = {1, 1, 1, 0, 0, 0}; 
+const int braille_M[6] = {1, 0, 1, 1, 0, 0}; 
+const int braille_N[6] = {1, 0, 1, 1, 1, 0}; 
+const int braille_O[6] = {1, 0, 1, 0, 1, 0}; 
+const int braille_P[6] = {1, 1, 1, 1, 0, 0}; 
+const int braille_Q[6] = {1, 1, 1, 1, 1, 0}; 
+const int braille_R[6] = {1, 1, 1, 0, 1, 0}; 
+const int braille_S[6] = {0, 1, 1, 1, 0, 0}; 
+const int braille_T[6] = {0, 1, 1, 1, 1, 0}; 
+const int braille_U[6] = {1, 0, 1, 0, 0, 1}; 
+const int braille_V[6] = {1, 1, 1, 0, 0, 1}; 
+const int braille_W[6] = {0, 1, 0, 1, 1, 1}; 
+const int braille_X[6] = {1, 0, 1, 1, 0, 1}; 
+const int braille_Y[6] = {1, 0, 1, 1, 1, 1}; 
+const int braille_Z[6] = {1, 0, 1, 0, 1, 1}; 
+
+// ==========================================
+// FUNÇÕES DE CONTROLE DOS MOTORES (PCA9685)
+// ==========================================
+void moverServo(uint8_t canal, int angulo) {
+    int pwm = map(angulo, 0, 180, SERVOMIN, SERVOMAX);
+    pca9685.setPWM(canal, 0, pwm);
+}
+
+void abaixarTodosPinos() {
+    for (int i = 0; i < 6; i++) {
+        moverServo(i, 0);
+    }
+}
+
+void atuarMatrizBraille(char letra) {
+    const int* matriz = NULL;
+  
+    switch(letra) {
+        case 'A': matriz = braille_A; break;
+        case 'B': matriz = braille_B; break;
+        case 'C': matriz = braille_C; break;
+        case 'D': matriz = braille_D; break;
+        case 'E': matriz = braille_E; break;
+        case 'F': matriz = braille_F; break;
+        case 'G': matriz = braille_G; break;
+        case 'H': matriz = braille_H; break;
+        case 'I': matriz = braille_I; break;
+        case 'J': matriz = braille_J; break;
+        case 'K': matriz = braille_K; break;
+        case 'L': matriz = braille_L; break;
+        case 'M': matriz = braille_M; break;
+        case 'N': matriz = braille_N; break;
+        case 'O': matriz = braille_O; break;
+        case 'P': matriz = braille_P; break;
+        case 'Q': matriz = braille_Q; break;
+        case 'R': matriz = braille_R; break;
+        case 'S': matriz = braille_S; break;
+        case 'T': matriz = braille_T; break;
+        case 'U': matriz = braille_U; break;
+        case 'V': matriz = braille_V; break;
+        case 'W': matriz = braille_W; break;
+        case 'X': matriz = braille_X; break;
+        case 'Y': matriz = braille_Y; break;
+        case 'Z': matriz = braille_Z; break;
+        default: 
+            Serial.println("Erro: Caractere invalido ou nao mapeado.");
+            abaixarTodosPinos();
+            return;
+    }
+
+    Serial.println("Acionando cames via PCA9685...");
+
+    // Laço com delay cascata para evitar Brownout no XIAO C3
+    for (int i = 0; i < 6; i++) {
+        if (matriz[i] == 1) {
+            moverServo(i, 90); 
+        } else {
+            moverServo(i, 0);  
+        }
+        delay(150); // Segurança elétrica!
+    }
+}
+
+// ==========================================
+// CONFIGURAÇÃO INICIAL
+// ==========================================
+void setup() {
+    Serial.begin(115200);
+
+    // Inicializa o I2C com os pinos definidos no seu teste
+    Wire.begin(5, 6);
+
+    pca9685.begin();
+    pca9685.setPWMFreq(50);
+    
+    delay(1000);
+    
+    Serial.println("Inicializando a BrailleBox...");
+    abaixarTodosPinos();
+    
+    Serial.println("Sistema pronto. Aguardando entrada via Serial (temporario):");
+}
+
+// ==========================================
+// LOOP PRINCIPAL
+// ==========================================
+void loop() {
+    // Bloco temporário para testes mecânicos. 
+    // Será substituído pelo retorno do código do microfone.
+    if (Serial.available() > 0) {
+        char letraEntrada = Serial.read();
+        
+        if (letraEntrada == '\n' || letraEntrada == '\r') return; 
+        
+        letraEntrada = toupper(letraEntrada); 
+        
+        Serial.print("\nLetra recebida: ");
+        Serial.println(letraEntrada);
+        
+        atuarMatrizBraille(letraEntrada);
+        
+        delay(3000); 
+        
+        Serial.println("Resetando matriz Braille para o repouso...");
+        abaixarTodosPinos(); 
+        
+        Serial.println("\nAguardando proxima letra...");
+    }
+}
