@@ -1,0 +1,558 @@
+/* ============================= */
+/* RESET                         */
+/* ============================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+
+
+/* ============================= */
+/* BODY                          */
+/* ============================= */
+
+body{
+
+    font-family:'Inter',sans-serif;
+
+    background:#EFE2CB;
+
+    color:#091C47;
+
+    min-height:100vh;
+
+}
+
+
+
+/* ============================= */
+/* APP                           */
+/* ============================= */
+
+.app{
+
+    width:min(1100px,92vw);
+
+    margin:40px auto;
+
+}
+
+
+
+/* ============================= */
+/* ANIMAÇÃO DE ENTRADA           */
+/* ============================= */
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(15px);
+
+    }
+
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+
+
+/* ============================= */
+/* LOGO                          */
+/* ============================= */
+
+.logo-card{
+
+    display:flex;
+
+    justify-content:center;
+
+    margin-bottom:30px;
+
+    animation:
+
+    fadeUp .55s cubic-bezier(.22,1,.36,1);
+
+}
+
+
+
+.logo-card img{
+
+    height:105px;
+
+}
+
+
+
+/* ============================= */
+/* DASHBOARD                     */
+/* ============================= */
+
+.dashboard{
+
+    background:white;
+
+    border-radius:28px;
+
+    padding:45px;
+
+
+    box-shadow:
+
+    0 25px 60px rgba(9,28,71,.10);
+
+
+
+    animation:
+
+    fadeUp .55s cubic-bezier(.22,1,.36,1);
+
+
+
+    animation-delay:.08s;
+
+}
+
+
+
+/* ============================= */
+/* LETRA + BRAILLE               */
+/* ============================= */
+
+.display{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    align-items:center;
+
+    margin-bottom:40px;
+
+}
+
+
+
+.letter-area{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+
+
+.braille-area{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+
+
+#letter{
+
+    width:150px;
+
+    text-align:center;
+
+    font-size:8rem;
+
+    font-weight:700;
+
+    color:#091C47;
+
+}
+
+
+
+/* ============================= */
+/* BRAILLE                       */
+/* ============================= */
+
+#braille{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,60px);
+
+    grid-template-rows:repeat(3,60px);
+
+    gap:20px;
+
+}
+
+
+
+.dot{
+
+    width:46px;
+
+    height:46px;
+
+    border-radius:50%;
+
+
+    border:4px solid #091C47;
+
+
+    background:white;
+
+
+    transition:.25s ease;
+
+}
+
+
+
+.dot.active{
+
+    background:#091C47;
+
+}
+
+
+
+/* ============================= */
+/* CARDS                         */
+/* ============================= */
+
+.message-card,
+.status-card,
+.shortcut-card{
+
+    background:#F8F4EB;
+
+    border:2px solid #EFE2CB;
+
+    border-radius:18px;
+
+}
+
+
+
+.message-card{
+
+    margin-top:18px;
+
+    padding:22px;
+
+
+    text-align:center;
+
+
+    font-weight:600;
+
+
+    font-size:1.15rem;
+
+    transition:opacity .35s ease;
+
+
+}
+
+
+
+.status-card{
+
+    margin-top:18px;
+
+    padding:0 22px;
+
+
+    height:0;
+
+
+    opacity:0;
+
+
+    overflow:hidden;
+
+
+    text-align:center;
+
+
+    font-weight:600;
+
+
+    font-size:1.1rem;
+
+
+
+    transition:
+
+    height .3s ease,
+
+    padding .3s ease,
+
+    opacity .25s ease;
+
+}
+
+
+/* quando tiver texto no status */
+
+.status-card:has(p:not(:empty)){
+
+
+    height:auto;
+
+    padding:22px;
+
+    opacity:1;
+
+}
+
+
+
+/* ============================= */
+/* ESPAÇO CONFIRMAR              */
+/* ============================= */
+
+.shortcut-card{
+
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+
+
+    margin-top:18px;
+
+
+
+    padding:0 22px;
+
+
+    height:0;
+
+
+    opacity:0;
+
+
+    overflow:hidden;
+
+
+    pointer-events:none;
+
+
+
+    transform:translateY(15px);
+
+
+
+    transition:
+
+    height .35s ease,
+
+    padding .35s ease,
+
+    opacity .35s ease,
+
+    transform .35s cubic-bezier(.22,1,.36,1);
+
+}
+
+
+
+.shortcut-card.show{
+
+
+    height:70px;
+
+
+    padding:22px;
+
+
+    opacity:1;
+
+
+
+    transform:translateY(0);
+
+
+
+    pointer-events:auto;
+
+}
+
+
+
+.shortcut{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+}
+
+
+
+kbd{
+
+    background:#091C47;
+
+
+    color:white;
+
+
+    padding:8px 16px;
+
+
+    border-radius:10px;
+
+
+    font-family:inherit;
+
+
+    font-size:.95rem;
+
+
+    font-weight:600;
+
+}
+
+
+
+.shortcut span{
+
+    font-weight:600;
+
+}
+
+
+
+/* ============================= */
+/* TOAST                         */
+/* ============================= */
+
+#toast{
+
+
+    position:fixed;
+
+
+    bottom:40px;
+
+
+    left:50%;
+
+
+
+    transform:
+
+    translateX(-50%)
+
+    translateY(30px);
+
+
+
+    background:#091C47;
+
+
+    color:white;
+
+
+
+    padding:16px 28px;
+
+
+
+    border-radius:14px;
+
+
+
+    font-weight:600;
+
+
+
+    opacity:0;
+
+
+
+    pointer-events:none;
+
+
+
+    transition:.35s ease;
+
+}
+
+
+
+#toast.show{
+
+
+    opacity:1;
+
+
+
+    transform:
+
+    translateX(-50%)
+
+    translateY(0);
+
+}
+
+
+
+/* ============================= */
+/* RESPONSIVO                    */
+/* ============================= */
+
+@media(max-width:850px){
+
+
+    .display{
+
+        grid-template-columns:1fr;
+
+        gap:50px;
+
+    }
+
+
+
+    #letter{
+
+        font-size:6rem;
+
+    }
+
+
+
+    .dashboard{
+
+        padding:30px;
+
+    }
+
+
+
+}

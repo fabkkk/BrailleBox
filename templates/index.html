@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BrailleBox</title>
+
+
+    <!-- Fonte -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+    <!-- Logo -->
+
+    <div class="logo-card">
+
+        <img src="/static/images/logo.png"
+             alt="BrailleBox">
+
+    </div>
+
+
+
+
+
+    <!-- Painel principal -->
+
+    <main class="dashboard">
+
+
+
+        <!-- Letra + Braille -->
+
+        <section class="display">
+
+
+            <div class="letter-area">
+
+
+                <div id="letter">
+
+                    —
+
+                </div>
+
+
+            </div>
+
+
+
+
+            <div class="braille-area">
+
+
+                <div id="braille">
+
+
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+
+
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+
+
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+
+
+
+        <!-- Mensagem principal -->
+
+        <section class="message-card">
+
+
+            <p id="message">
+
+                Selecione uma <strong>letra</strong> do teclado.
+
+
+            </p>
+
+
+        </section>
+
+
+
+
+
+
+        <!-- Status -->
+
+        <section class="status-card">
+
+
+            <p id="status"></p>
+
+
+        </section>
+
+
+
+
+
+
+        <!-- Atalho espaço -->
+
+        <section class="shortcut-card" id="shortcut">
+
+
+            <div class="shortcut">
+
+
+                <kbd>ESPAÇO</kbd>
+
+
+                <span>
+
+                    Confirmar
+
+                </span>
+
+
+            </div>
+
+
+        </section>
+
+
+
+
+
+
+    </main>
+
+
+</div>
+
+
+
+
+
+
+<!-- Toast -->
+
+<div id="toast"></div>
+
+
+
+
+
+
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+
+
+</body>
+
+
+</html>
