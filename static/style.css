@@ -1,18 +1,8 @@
-/* ============================= */
-/* RESET                         */
-/* ============================= */
-
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
 }
-
-
-
-/* ============================= */
-/* BODY                          */
-/* ============================= */
 
 body{
 
@@ -26,12 +16,6 @@ body{
 
 }
 
-
-
-/* ============================= */
-/* APP                           */
-/* ============================= */
-
 .app{
 
     width:min(1100px,92vw);
@@ -39,12 +23,6 @@ body{
     margin:40px auto;
 
 }
-
-
-
-/* ============================= */
-/* ANIMAÇÃO DE ENTRADA           */
-/* ============================= */
 
 @keyframes fadeUp{
 
@@ -67,12 +45,6 @@ body{
 
 }
 
-
-
-/* ============================= */
-/* LOGO                          */
-/* ============================= */
-
 .logo-card{
 
     display:flex;
@@ -87,19 +59,11 @@ body{
 
 }
 
-
-
 .logo-card img{
 
     height:105px;
 
 }
-
-
-
-/* ============================= */
-/* DASHBOARD                     */
-/* ============================= */
 
 .dashboard{
 
@@ -126,12 +90,6 @@ body{
 
 }
 
-
-
-/* ============================= */
-/* LETRA + BRAILLE               */
-/* ============================= */
-
 .display{
 
     display:grid;
@@ -144,8 +102,6 @@ body{
 
 }
 
-
-
 .letter-area{
 
     display:flex;
@@ -156,8 +112,6 @@ body{
 
 }
 
-
-
 .braille-area{
 
     display:flex;
@@ -167,8 +121,6 @@ body{
     align-items:center;
 
 }
-
-
 
 #letter{
 
@@ -184,12 +136,6 @@ body{
 
 }
 
-
-
-/* ============================= */
-/* BRAILLE                       */
-/* ============================= */
-
 #braille{
 
     display:grid;
@@ -201,8 +147,6 @@ body{
     gap:20px;
 
 }
-
-
 
 .dot{
 
@@ -223,19 +167,11 @@ body{
 
 }
 
-
-
 .dot.active{
 
     background:#091C47;
 
 }
-
-
-
-/* ============================= */
-/* CARDS                         */
-/* ============================= */
 
 .message-card,
 .status-card,
@@ -248,8 +184,6 @@ body{
     border-radius:18px;
 
 }
-
-
 
 .message-card{
 
@@ -266,12 +200,14 @@ body{
 
     font-size:1.15rem;
 
-    transition:opacity .35s ease;
-
 
 }
 
+.message-card p{
 
+    transition: opacity .35s ease;
+
+}
 
 .status-card{
 
@@ -309,9 +245,6 @@ body{
 
 }
 
-
-/* quando tiver texto no status */
-
 .status-card:has(p:not(:empty)){
 
 
@@ -322,12 +255,6 @@ body{
     opacity:1;
 
 }
-
-
-
-/* ============================= */
-/* ESPAÇO CONFIRMAR              */
-/* ============================= */
 
 .shortcut-card{
 
@@ -376,8 +303,6 @@ body{
 
 }
 
-
-
 .shortcut-card.show{
 
 
@@ -399,8 +324,6 @@ body{
 
 }
 
-
-
 .shortcut{
 
     display:flex;
@@ -410,8 +333,6 @@ body{
     gap:14px;
 
 }
-
-
 
 kbd{
 
@@ -437,19 +358,11 @@ kbd{
 
 }
 
-
-
 .shortcut span{
 
     font-weight:600;
 
 }
-
-
-
-/* ============================= */
-/* TOAST                         */
-/* ============================= */
 
 #toast{
 
@@ -503,8 +416,6 @@ kbd{
 
 }
 
-
-
 #toast.show{
 
 
@@ -519,12 +430,6 @@ kbd{
     translateY(0);
 
 }
-
-
-
-/* ============================= */
-/* RESPONSIVO                    */
-/* ============================= */
 
 @media(max-width:850px){
 

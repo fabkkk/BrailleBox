@@ -4,8 +4,6 @@ let selectedLetter = null;
 let statusTimer = null;
 
 
-// Elementos da tela
-
 const letterDisplay = document.getElementById("letter");
 const messageDisplay = document.getElementById("message");
 const statusDisplay = document.getElementById("status");
@@ -15,17 +13,12 @@ const dots = document.querySelectorAll(".dot");
 const shortcut = document.getElementById("shortcut");
 
 
-
-// Estado inicial
-
 messageDisplay.textContent =
 "Selecione uma letra do teclado.";
 
 statusDisplay.textContent = "";
 
 
-
-// Tabela Braille
 
 const brailleMap = {
 
@@ -64,7 +57,6 @@ const brailleMap = {
 
 
 
-// Limpar pontos
 
 function clearDots(){
 
@@ -76,9 +68,6 @@ function clearDots(){
 
 }
 
-
-
-// Mostrar Braille
 
 function showBraille(letter){
 
@@ -101,8 +90,6 @@ function showBraille(letter){
 
 
 
-// Toast
-
 function showToast(message){
 
     const toast = document.getElementById("toast");
@@ -124,8 +111,6 @@ function showToast(message){
 
 
 
-// Selecionar letra
-
 function selectLetter(letter){
 
 
@@ -146,23 +131,27 @@ function selectLetter(letter){
     `Letra ${letter} selecionada.`;
 
 
-
     statusDisplay.textContent = "";
-
 
 
     showBraille(letter);
 
 
+    fetch(`/selecionar/${letter}`, {
+        method:"POST"
+    })
+    .then(() => {
 
-    shortcut.classList.add("show");
+        shortcut.classList.add("show");
 
+        fetch("/audio/espaco", {
+            method:"POST"
+        });
+
+    });
 
 }
 
-
-
-// Teclado
 
 document.addEventListener("keydown", (event)=>{
 
@@ -170,8 +159,6 @@ document.addEventListener("keydown", (event)=>{
     const key = event.key.toUpperCase();
 
 
-
-    // Letras A-Z
 
     if(/^[A-Z]$/.test(key)){
 
@@ -185,8 +172,6 @@ document.addEventListener("keydown", (event)=>{
 
 
 
-    // Espaço confirma
-
     if(event.code === "Space"){
 
 
@@ -198,6 +183,32 @@ document.addEventListener("keydown", (event)=>{
 
 
             const confirmedLetter = selectedLetter;
+
+            fetch("/confirmar", {
+
+    method:"POST",
+
+    headers:{
+
+        "Content-Type":"application/json"
+
+    },
+
+    body:JSON.stringify({
+
+        letra:confirmedLetter
+
+    })
+
+})
+
+.then(response => response.json())
+
+.then(data => {
+
+    console.log(data);
+
+});
 
 
 
@@ -211,10 +222,29 @@ selectedLetter = null;
 
 statusTimer = setTimeout(()=>{
 
-    messageDisplay.textContent =
-    "Aguardando nova letra.";
 
-},1500);
+    messageDisplay.style.opacity = "0";
+
+
+    setTimeout(()=>{
+
+
+        messageDisplay.textContent =
+        "Aguardando nova letra.";
+
+        fetch("/audio/nova", {
+    method:"POST"
+});
+
+
+        messageDisplay.style.opacity = "1";
+
+
+    },350);
+
+
+
+},5000);
 
 
         }
@@ -223,9 +253,13 @@ statusTimer = setTimeout(()=>{
         else{
 
 
-            showToast(
-                "Nenhuma letra selecionada."
-            );
+            fetch("/audio/nenhuma", {
+    method:"POST"
+});
+
+showToast(
+    "Nenhuma letra selecionada."
+);
 
 
         }
@@ -237,9 +271,13 @@ statusTimer = setTimeout(()=>{
 
 
 
-    showToast(
-        "Isso não é uma letra."
-    );
+    fetch("/audio/invalida", {
+    method:"POST"
+});
+
+showToast(
+    "Isso não é uma letra."
+);
 
 
 });
