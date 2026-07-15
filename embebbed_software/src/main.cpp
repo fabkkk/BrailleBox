@@ -4,13 +4,18 @@
 #include <ctype.h>
 
 constexpr uint8_t PCA9685_ENDERECO = 0x40;
-constexpr uint8_t QUANTIDADE_SERVOS = 6;
+// Teste inicial: somente o canal 0 esta conectado. Ele representa o ponto 1
+// da celula Braille. Para usar os seis servos futuramente, altere para 6.
+constexpr uint8_t QUANTIDADE_SERVOS = 1;
+constexpr uint8_t CANAL_SERVO_TESTE = 0;
+constexpr int ANGULO_REPOUSO = 0;
+constexpr int ANGULO_PONTO_ATIVO = 90;
 // Faixa conservadora para SG90 a 50 Hz: aproximadamente 0,59 ms a 2,44 ms.
 // Valores extremos demais podem ser ignorados pelo servo ou forcar o batente.
 constexpr uint16_t SERVOMIN = 120;
 constexpr uint16_t SERVOMAX = 500;
-constexpr uint8_t PINO_SDA = D5;
-constexpr uint8_t PINO_SCL = D6;
+constexpr uint8_t PINO_SDA = D4;
+constexpr uint8_t PINO_SCL = D5;
 
 Adafruit_PWMServoDriver pca9685(PCA9685_ENDERECO);
 bool pcaConectado = false;
@@ -124,40 +129,22 @@ void atuarMatrizBraille(char letra)
         return;
     }
 
-    Serial.print("Acionando letra ");
+    Serial.print("Letra recebida: ");
     Serial.println(letra);
-    Serial.print("Canais ativos:");
-
-    // Garante que somente os pontos da letra recebam pulsos PWM.
-    desligarTodosServos();
-
-    for (uint8_t canal = 0; canal < QUANTIDADE_SERVOS; canal++)
+    if (matriz[CANAL_SERVO_TESTE] == 0)
     {
-        if (matriz[canal] == 1)
-        {
-            Serial.print(' ');
-            Serial.print(canal);
-            moverServo(canal, 90);
-            delay(150);
-        }
+        Serial.println("Ponto 1 inativo: o servo permanece parado.");
+        return;
     }
-    Serial.println();
+
+    Serial.println("Ponto 1 ativo: movimentando o servo do canal 0.");
+    moverServo(CANAL_SERVO_TESTE, ANGULO_PONTO_ATIVO);
 
     delay(3000);
     Serial.println("Retornando ao repouso...");
-
-    // Retorna somente os servos usados na letra; os demais ficam desligados.
-    for (uint8_t canal = 0; canal < QUANTIDADE_SERVOS; canal++)
-    {
-        if (matriz[canal] == 1)
-        {
-            moverServo(canal, 0);
-            delay(150);
-        }
-    }
-
-    delay(500);
-    desligarTodosServos();
+    moverServo(CANAL_SERVO_TESTE, ANGULO_REPOUSO);
+    delay(700);
+    pca9685.setPWM(CANAL_SERVO_TESTE, 0, 4096);
 }
 
 void testarServo(uint8_t canal)
@@ -171,11 +158,11 @@ void testarServo(uint8_t canal)
     Serial.print("Testando somente o servo do canal ");
     Serial.println(canal);
 
-    moverServo(canal, 0);
+    moverServo(canal, ANGULO_REPOUSO);
     delay(700);
-    moverServo(canal, 90);
+    moverServo(canal, ANGULO_PONTO_ATIVO);
     delay(1200);
-    moverServo(canal, 0);
+    moverServo(canal, ANGULO_REPOUSO);
     delay(700);
     pca9685.setPWM(canal, 0, 4096);
 
@@ -261,7 +248,7 @@ void processarComando()
 {
     if (comandoMuitoLongo)
     {
-        Serial.println("ERRO: comando muito longo. Use A-Z ou T0-T5.");
+        Serial.println("ERRO: comando muito longo. Use A-Z ou T0.");
     }
     else if (tamanhoComando == 1 && comandoSerial[0] == '?')
     {
@@ -274,13 +261,13 @@ void processarComando()
     }
     else if (tamanhoComando == 2 &&
              toupper(static_cast<unsigned char>(comandoSerial[0])) == 'T' &&
-             comandoSerial[1] >= '0' && comandoSerial[1] <= '5')
+             comandoSerial[1] == '0')
     {
         testarServo(static_cast<uint8_t>(comandoSerial[1] - '0'));
     }
     else if (tamanhoComando > 0)
     {
-        Serial.println("ERRO: use A-Z, T0-T5 ou ? e pressione Enter.");
+        Serial.println("ERRO: use A-Z, T0 ou ? e pressione Enter.");
     }
 
     tamanhoComando = 0;
@@ -323,7 +310,8 @@ void setup()
         Serial.println("OK: PCA9685 encontrado no endereco 0x40.");
     }
 
-    Serial.println("Comandos: A-Z = letra; T0-T5 = teste; ? = diagnostico I2C.");
+    Serial.println("Modo de teste: 1 servo no canal 0 (ponto Braille 1).");
+    Serial.println("Comandos: A-Z = letra; T0 = teste direto; ? = diagnostico I2C.");
     Serial.println("Digite um comando e pressione Enter.");
 }
 
