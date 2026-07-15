@@ -1,18 +1,9 @@
 from flask import Flask, render_template, request, jsonify
 from braille import braille_map
-import subprocess
+from audio import tocar_audio, tocar_sequencia
 
-def tocar_audio(caminho):
-
-    processo = subprocess.Popen(
-        ["mpg123", caminho]
-    )
-
-    return processo
 
 app = Flask(__name__)
-
-
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -75,17 +66,13 @@ def audio(nome):
 @app.route("/selecionar/<letra>", methods=["POST"])
 def selecionar(letra):
 
-    processo = tocar_audio(
-        f"audios/selecao/select_{letra}.mp3"
-    )
+    tocar_sequencia([
 
-    processo.wait()
+        f"audios/selecao/select_{letra}.mp3",
 
-
-    tocar_audio(
         "audios/sistema/confirmar_espaco.mp3"
-    )
 
+    ])
 
     return jsonify({
         "status":"sucesso"
