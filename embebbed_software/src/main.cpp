@@ -147,19 +147,11 @@ void atuarMatrizBraille(char letra)
         {
             moverServo(canal, ANGULO_REPOUSO);
         }
-        delay(100);
+        delay(40);
     }
     Serial.println();
 
-    delay(TEMPO_EXIBICAO_MS);
-    Serial.println("Retornando todos os pontos ao repouso...");
-    for (uint8_t canal = 0; canal < QUANTIDADE_SERVOS; canal++)
-    {
-        moverServo(canal, ANGULO_REPOUSO);
-        delay(100);
-    }
-    delay(700);
-    desligarTodosServos();
+    Serial.println("Aguardando a próxima letra...");
 }
 
 void testarServo(uint8_t canal)
