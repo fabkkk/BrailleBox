@@ -271,7 +271,7 @@ showToast(
 });
 
 showToast(
-    "Isso não é uma letra."
+    "Tecla inválida."
 );
 
 
