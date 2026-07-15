@@ -129,6 +129,14 @@ void atuarMatrizBraille(char letra)
         return;
     }
 
+    // Abaixa todos os servos da letra anterior
+for (uint8_t canal = 0; canal < QUANTIDADE_SERVOS; canal++)
+{
+    moverServo(canal, ANGULO_REPOUSO);
+}
+
+delay(400);
+
     Serial.print("Letra recebida: ");
     Serial.println(letra);
     Serial.print("Pontos ativos:");
