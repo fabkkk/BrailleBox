@@ -8,6 +8,7 @@ constexpr uint8_t PCA9685_ENDERECO = 0x40;
 constexpr uint8_t QUANTIDADE_SERVOS = 6;
 constexpr int ANGULO_REPOUSO = 0;
 constexpr int ANGULO_PONTO_ATIVO = 90;
+constexpr uint32_t TEMPO_EXIBICAO_MS = 20000;
 // Faixa conservadora para SG90 a 50 Hz: aproximadamente 0,59 ms a 2,44 ms.
 // Valores extremos demais podem ser ignorados pelo servo ou forcar o batente.
 constexpr uint16_t SERVOMIN = 120;
@@ -150,7 +151,7 @@ void atuarMatrizBraille(char letra)
     }
     Serial.println();
 
-    delay(3000);
+    delay(TEMPO_EXIBICAO_MS);
     Serial.println("Retornando todos os pontos ao repouso...");
     for (uint8_t canal = 0; canal < QUANTIDADE_SERVOS; canal++)
     {
