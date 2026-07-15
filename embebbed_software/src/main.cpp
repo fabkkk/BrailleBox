@@ -4,10 +4,8 @@
 #include <ctype.h>
 
 constexpr uint8_t PCA9685_ENDERECO = 0x40;
-// Teste inicial: somente o canal 0 esta conectado. Ele representa o ponto 1
-// da celula Braille. Para usar os seis servos futuramente, altere para 6.
-constexpr uint8_t QUANTIDADE_SERVOS = 1;
-constexpr uint8_t CANAL_SERVO_TESTE = 0;
+// Celula Braille completa: canais 0 a 5 representam os pontos 1 a 6.
+constexpr uint8_t QUANTIDADE_SERVOS = 6;
 constexpr int ANGULO_REPOUSO = 0;
 constexpr int ANGULO_PONTO_ATIVO = 90;
 // Faixa conservadora para SG90 a 50 Hz: aproximadamente 0,59 ms a 2,44 ms.
@@ -27,7 +25,8 @@ char comandoSerial[8] = {};
 uint8_t tamanhoComando = 0;
 bool comandoMuitoLongo = false;
 
-// Ordem dos pontos/canais: {0, 1, 2, 3, 4, 5}.
+// Ordem da matriz: pontos Braille {1, 2, 3, 4, 5, 6}.
+// Mapeamento no PCA9685: ponto 1 = canal 0, ..., ponto 6 = canal 5.
 const uint8_t braille_A[6] = {1, 0, 0, 0, 0, 0};
 const uint8_t braille_B[6] = {1, 1, 0, 0, 0, 0};
 const uint8_t braille_C[6] = {1, 0, 0, 1, 0, 0};
@@ -131,20 +130,35 @@ void atuarMatrizBraille(char letra)
 
     Serial.print("Letra recebida: ");
     Serial.println(letra);
-    if (matriz[CANAL_SERVO_TESTE] == 0)
-    {
-        Serial.println("Ponto 1 inativo: o servo permanece parado.");
-        return;
-    }
+    Serial.print("Pontos ativos:");
 
-    Serial.println("Ponto 1 ativo: movimentando o servo do canal 0.");
-    moverServo(CANAL_SERVO_TESTE, ANGULO_PONTO_ATIVO);
+    // Posiciona todos os servos conforme a letra. Os pontos ativos sobem e os
+    // inativos ficam em repouso.
+    for (uint8_t canal = 0; canal < QUANTIDADE_SERVOS; canal++)
+    {
+        if (matriz[canal] == 1)
+        {
+            Serial.print(' ');
+            Serial.print(canal + 1);
+            moverServo(canal, ANGULO_PONTO_ATIVO);
+        }
+        else
+        {
+            moverServo(canal, ANGULO_REPOUSO);
+        }
+        delay(100);
+    }
+    Serial.println();
 
     delay(3000);
-    Serial.println("Retornando ao repouso...");
-    moverServo(CANAL_SERVO_TESTE, ANGULO_REPOUSO);
+    Serial.println("Retornando todos os pontos ao repouso...");
+    for (uint8_t canal = 0; canal < QUANTIDADE_SERVOS; canal++)
+    {
+        moverServo(canal, ANGULO_REPOUSO);
+        delay(100);
+    }
     delay(700);
-    pca9685.setPWM(CANAL_SERVO_TESTE, 0, 4096);
+    desligarTodosServos();
 }
 
 void testarServo(uint8_t canal)
@@ -248,7 +262,7 @@ void processarComando()
 {
     if (comandoMuitoLongo)
     {
-        Serial.println("ERRO: comando muito longo. Use A-Z ou T0.");
+        Serial.println("ERRO: comando muito longo. Use A-Z ou T0-T5.");
     }
     else if (tamanhoComando == 1 && comandoSerial[0] == '?')
     {
@@ -261,13 +275,13 @@ void processarComando()
     }
     else if (tamanhoComando == 2 &&
              toupper(static_cast<unsigned char>(comandoSerial[0])) == 'T' &&
-             comandoSerial[1] == '0')
+             comandoSerial[1] >= '0' && comandoSerial[1] <= '5')
     {
         testarServo(static_cast<uint8_t>(comandoSerial[1] - '0'));
     }
     else if (tamanhoComando > 0)
     {
-        Serial.println("ERRO: use A-Z, T0 ou ? e pressione Enter.");
+        Serial.println("ERRO: use A-Z, T0-T5 ou ? e pressione Enter.");
     }
 
     tamanhoComando = 0;
@@ -310,8 +324,8 @@ void setup()
         Serial.println("OK: PCA9685 encontrado no endereco 0x40.");
     }
 
-    Serial.println("Modo de teste: 1 servo no canal 0 (ponto Braille 1).");
-    Serial.println("Comandos: A-Z = letra; T0 = teste direto; ? = diagnostico I2C.");
+    Serial.println("Modo: 6 servos nos canais 0-5 (pontos Braille 1-6).");
+    Serial.println("Comandos: A-Z = letra; T0-T5 = teste individual; ? = diagnostico I2C.");
     Serial.println("Digite um comando e pressione Enter.");
 }
 
