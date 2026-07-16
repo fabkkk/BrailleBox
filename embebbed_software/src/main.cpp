@@ -8,7 +8,6 @@ constexpr uint8_t PCA9685_ENDERECO = 0x40;
 constexpr uint8_t QUANTIDADE_SERVOS = 6;
 constexpr int ANGULO_REPOUSO = 0;
 constexpr int ANGULO_PONTO_ATIVO = 90;
-constexpr uint32_t TEMPO_EXIBICAO_MS = 20000;
 // Faixa conservadora para SG90 a 50 Hz: aproximadamente 0,59 ms a 2,44 ms.
 // Valores extremos demais podem ser ignorados pelo servo ou forcar o batente.
 constexpr uint16_t SERVOMIN = 120;
@@ -22,7 +21,7 @@ uint8_t sdaEmUso = PINO_SDA;
 uint8_t sclEmUso = PINO_SCL;
 
 // Cada comando so e processado depois de Enter.
-char comandoSerial[16] = {};
+char comandoSerial[8] = {};
 uint8_t tamanhoComando = 0;
 bool comandoMuitoLongo = false;
 
@@ -64,17 +63,6 @@ void moverServo(uint8_t canal, int angulo)
 
     const uint16_t pwm = map(angulo, 0, 180, SERVOMIN, SERVOMAX);
     pca9685.setPWM(canal, 0, pwm);
-}
-
-
-void resetarBraille()
-{
-    for (uint8_t canal = 0; canal < QUANTIDADE_SERVOS; canal++)
-    {
-        moverServo(canal, ANGULO_REPOUSO);
-    }
-
-    delay(400); // tempo para todos abaixarem
 }
 
 void desligarTodosServos()
@@ -140,7 +128,16 @@ void atuarMatrizBraille(char letra)
         return;
     }
 
-    Serial.print("Letra recebida: ");
+    Serial.println("Abaixando os pontos da letra anterior...");
+    for (uint8_t canal = 0; canal < QUANTIDADE_SERVOS; canal++)
+    {
+        moverServo(canal, ANGULO_REPOUSO);
+    }
+
+    // Aguarda os servos chegarem ao repouso antes de formar a nova letra.
+    delay(700);
+
+    Serial.print("Formando a letra: ");
     Serial.println(letra);
     Serial.print("Pontos ativos:");
 
@@ -158,11 +155,10 @@ void atuarMatrizBraille(char letra)
         {
             moverServo(canal, ANGULO_REPOUSO);
         }
-        delay(40);
+        delay(100);
     }
     Serial.println();
-
-    Serial.println("Aguardando a próxima letra...");
+    Serial.println("Letra mantida ate a chegada do proximo comando.");
 }
 
 void testarServo(uint8_t canal)
@@ -272,10 +268,6 @@ void processarComando()
     {
         relatorioEletricoI2C();
     }
-    else if (strcmp(comandoSerial, "RESET") == 0)
-    {
-    resetarBraille();
-    }
     else if (tamanhoComando == 1 && isalpha(static_cast<unsigned char>(comandoSerial[0])))
     {
         const char letra = static_cast<char>(toupper(static_cast<unsigned char>(comandoSerial[0])));
@@ -328,7 +320,7 @@ void setup()
     {
         pca9685.setPWMFreq(50);
         delay(10);
-        resetarBraille();
+        desligarTodosServos();
         Serial.println("OK: PCA9685 encontrado no endereco 0x40.");
     }
 
