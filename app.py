@@ -1,9 +1,19 @@
 from flask import Flask, render_template, request, jsonify
 from braille import braille_map
 from audio import tocar_audio, tocar_sequencia
-
+import serial
+import time
 
 app = Flask(__name__)
+
+esp = serial.Serial(
+    "/dev/ttyACM0",
+    115200,
+    timeout=1
+)
+
+time.sleep(2)
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -12,32 +22,20 @@ def home():
 @app.route("/confirmar", methods=["POST"])
 def confirmar():
 
-    dados = request.json
+    print("=== ENTREI NA ROTA CONFIRMAR ===")
 
+    dados = request.json
+    
     letra = dados["letra"]
 
-    tocar_audio(
-    f"audios/confirmacao/letra_{letra}.mp3"
-)
+    print("Letra:", letra)
 
+    tocar_audio(f"audios/confirmacao/letra_{letra}.mp3")
 
-    pontos = braille_map[letra]
-
-
-    print("Letra confirmada:", letra)
-
-    print("Pontos Braille:", pontos)
-
-
-    return jsonify({
-
-        "status": "sucesso",
-
-        "letra_recebida": letra,
-
-        "pontos": pontos
-
-    })
+    print("Vou enviar para o ESP...")
+    esp.write(f"{letra}\n".encode())
+    esp.flush()
+    print("Enviei!")
 
 @app.route("/audio/<nome>", methods=["POST"])
 def audio(nome):
