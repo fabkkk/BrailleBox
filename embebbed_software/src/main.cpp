@@ -66,6 +66,17 @@ void moverServo(uint8_t canal, int angulo)
     pca9685.setPWM(canal, 0, pwm);
 }
 
+
+void resetarBraille()
+{
+    for (uint8_t canal = 0; canal < QUANTIDADE_SERVOS; canal++)
+    {
+        moverServo(canal, ANGULO_REPOUSO);
+    }
+
+    delay(400); // tempo para todos abaixarem
+}
+
 void desligarTodosServos()
 {
     if (!pcaConectado)
@@ -128,14 +139,6 @@ void atuarMatrizBraille(char letra)
         Serial.println("ERRO: letra invalida.");
         return;
     }
-
-    // Abaixa todos os servos da letra anterior
-for (uint8_t canal = 0; canal < QUANTIDADE_SERVOS; canal++)
-{
-    moverServo(canal, ANGULO_REPOUSO);
-}
-
-delay(400);
 
     Serial.print("Letra recebida: ");
     Serial.println(letra);
@@ -268,6 +271,10 @@ void processarComando()
     else if (tamanhoComando == 1 && comandoSerial[0] == '?')
     {
         relatorioEletricoI2C();
+    }
+    else if (strcmp(comandoSerial, "RESET") == 0)
+    {
+    resetarBraille();
     }
     else if (tamanhoComando == 1 && isalpha(static_cast<unsigned char>(comandoSerial[0])))
     {
