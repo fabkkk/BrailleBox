@@ -22,7 +22,7 @@ uint8_t sdaEmUso = PINO_SDA;
 uint8_t sclEmUso = PINO_SCL;
 
 // Cada comando so e processado depois de Enter.
-char comandoSerial[8] = {};
+char comandoSerial[16] = {};
 uint8_t tamanhoComando = 0;
 bool comandoMuitoLongo = false;
 
@@ -328,7 +328,7 @@ void setup()
     {
         pca9685.setPWMFreq(50);
         delay(10);
-        desligarTodosServos();
+        resetarBraille();
         Serial.println("OK: PCA9685 encontrado no endereco 0x40.");
     }
 
