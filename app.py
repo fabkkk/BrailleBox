@@ -5,7 +5,7 @@ import time
 
 app = Flask(__name__)
 
-ESP_PORT = "/dev/ttyACM" // sddubstituir pelo caminho correto da porta serial do ESP
+ESP_PORT = "/dev/ttyACM0"  # Substitua pelo caminho correto da porta serial do ESP.
 ESP_BAUDRATE = 115200
 esp = None
 
