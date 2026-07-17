@@ -1,7 +1,12 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
+<<<<<<< Updated upstream
 #include <ctype.h>
+=======
+#include <cctype>
+#include <cstring>
+>>>>>>> Stashed changes
 
 constexpr uint8_t PCA9685_ENDERECO = 0x40;
 // Celula Braille completa: canais 0 a 5 representam os pontos 1 a 6.
@@ -21,7 +26,11 @@ uint8_t sdaEmUso = PINO_SDA;
 uint8_t sclEmUso = PINO_SCL;
 
 // Cada comando so e processado depois de Enter.
+<<<<<<< Updated upstream
 char comandoSerial[8] = {};
+=======
+char comandoSerial[16] = {};
+>>>>>>> Stashed changes
 uint8_t tamanhoComando = 0;
 bool comandoMuitoLongo = false;
 
@@ -65,6 +74,20 @@ void moverServo(uint8_t canal, int angulo)
     pca9685.setPWM(canal, 0, pwm);
 }
 
+<<<<<<< Updated upstream
+=======
+
+void resetarBraille()
+{
+    for (uint8_t canal = 0; canal < QUANTIDADE_SERVOS; canal++)
+    {
+        moverServo(canal, ANGULO_REPOUSO);
+    }
+
+    delay(400); // tempo para todos abaixarem
+}
+
+>>>>>>> Stashed changes
 void desligarTodosServos()
 {
     if (!pcaConectado)
@@ -128,6 +151,7 @@ void atuarMatrizBraille(char letra)
         return;
     }
 
+<<<<<<< Updated upstream
     Serial.println("Abaixando os pontos da letra anterior...");
     for (uint8_t canal = 0; canal < QUANTIDADE_SERVOS; canal++)
     {
@@ -138,6 +162,9 @@ void atuarMatrizBraille(char letra)
     delay(700);
 
     Serial.print("Formando a letra: ");
+=======
+    Serial.print("Letra recebida: ");
+>>>>>>> Stashed changes
     Serial.println(letra);
     Serial.print("Pontos ativos:");
 
@@ -155,10 +182,18 @@ void atuarMatrizBraille(char letra)
         {
             moverServo(canal, ANGULO_REPOUSO);
         }
+<<<<<<< Updated upstream
         delay(100);
     }
     Serial.println();
     Serial.println("Letra mantida ate a chegada do proximo comando.");
+=======
+        delay(40);
+    }
+    Serial.println();
+
+    Serial.println("Aguardando a próxima letra...");
+>>>>>>> Stashed changes
 }
 
 void testarServo(uint8_t canal)
@@ -268,6 +303,7 @@ void processarComando()
     {
         relatorioEletricoI2C();
     }
+<<<<<<< Updated upstream
     else if (tamanhoComando == 1 && isalpha(static_cast<unsigned char>(comandoSerial[0])))
     {
         const char letra = static_cast<char>(toupper(static_cast<unsigned char>(comandoSerial[0])));
@@ -275,6 +311,19 @@ void processarComando()
     }
     else if (tamanhoComando == 2 &&
              toupper(static_cast<unsigned char>(comandoSerial[0])) == 'T' &&
+=======
+    else if (strcmp(comandoSerial, "RESET") == 0)
+    {
+    resetarBraille();
+    }
+    else if (tamanhoComando == 1 && std::isalpha(static_cast<unsigned char>(comandoSerial[0])))
+    {
+        const char letra = static_cast<char>(std::toupper(static_cast<unsigned char>(comandoSerial[0])));
+        atuarMatrizBraille(letra);
+    }
+    else if (tamanhoComando == 2 &&
+             std::toupper(static_cast<unsigned char>(comandoSerial[0])) == 'T' &&
+>>>>>>> Stashed changes
              comandoSerial[1] >= '0' && comandoSerial[1] <= '5')
     {
         testarServo(static_cast<uint8_t>(comandoSerial[1] - '0'));
@@ -320,7 +369,11 @@ void setup()
     {
         pca9685.setPWMFreq(50);
         delay(10);
+<<<<<<< Updated upstream
         desligarTodosServos();
+=======
+        resetarBraille();
+>>>>>>> Stashed changes
         Serial.println("OK: PCA9685 encontrado no endereco 0x40.");
     }
 
@@ -344,7 +397,11 @@ void loop()
             continue;
         }
 
+<<<<<<< Updated upstream
         if (!isPrintable(recebido))
+=======
+        if (!std::isprint(static_cast<unsigned char>(recebido)))
+>>>>>>> Stashed changes
         {
             continue;
         }

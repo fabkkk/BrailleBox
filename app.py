@@ -1,18 +1,28 @@
 from flask import Flask, render_template, request, jsonify
-from braille import braille_map
 from audio import tocar_audio, tocar_sequencia
 import serial
 import time
 
 app = Flask(__name__)
 
-esp = serial.Serial(
-    "/dev/ttyACM0",
-    115200,
-    timeout=1
-)
+ESP_PORT = "/dev/ttyACM" // sddubstituir pelo caminho correto da porta serial do ESP
+ESP_BAUDRATE = 115200
+esp = None
 
-time.sleep(2)
+
+def obter_esp():
+    global esp
+
+    if esp is not None and esp.is_open:
+        return esp
+
+    try:
+        esp = serial.Serial(ESP_PORT, ESP_BAUDRATE, timeout=1)
+        time.sleep(2)
+        return esp
+    except serial.SerialException as erro:
+        print(f"Nao foi possivel conectar ao ESP em {ESP_PORT}: {erro}")
+        return None
 
 @app.route("/")
 def home():
@@ -25,17 +35,34 @@ def confirmar():
     print("=== ENTREI NA ROTA CONFIRMAR ===")
 
     dados = request.json
-    
     letra = dados["letra"]
 
     print("Letra:", letra)
 
     tocar_audio(f"audios/confirmacao/letra_{letra}.mp3")
 
-    print("Vou enviar para o ESP...")
-    esp.write(f"{letra}\n".encode())
-    esp.flush()
+    esp_atual = obter_esp()
+    if esp_atual is None:
+        return jsonify({
+            "status": "erro",
+            "mensagem": "ESP nao conectado"
+        }), 503
+
+    # Abaixa a letra anterior
+    esp_atual.write(b"RESET\n")
+    esp_atual.flush()
+
+    time.sleep(0.5)
+
+    # Forma a nova letra
+    esp_atual.write(f"{letra}\n".encode())
+    esp_atual.flush()
+
     print("Enviei!")
+
+    return jsonify({
+        "status": "sucesso"
+    })
 
 @app.route("/audio/<nome>", methods=["POST"])
 def audio(nome):
@@ -47,18 +74,15 @@ def audio(nome):
         "espaco": "audios/sistema/confirmar_espaco.mp3"
     }
 
-
     if nome in arquivos:
-
         tocar_audio(arquivos[nome])
 
         return jsonify({
-            "status":"sucesso"
+            "status": "sucesso"
         })
 
-
     return jsonify({
-        "status":"erro"
+        "status": "erro"
     })
 
 @app.route("/selecionar/<letra>", methods=["POST"])
