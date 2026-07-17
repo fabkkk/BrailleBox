@@ -1,20 +1,67 @@
 import subprocess
+import threading
 
-audio_atual = None
-
-def tocar_audio(caminho):
-
-    global audio_atual
-
-
-    if audio_atual:
-
-        audio_atual.terminate()
+processo = None
+thread_audio = None
+cancelar = threading.Event()
+lock = threading.Lock()
 
 
-    audio_atual = subprocess.Popen(
-        ["mpg123", caminho]
+def _executar(lista):
+
+    global processo
+
+    cancelar.clear()
+
+    for arquivo in lista:
+
+        if cancelar.is_set():
+            return
+
+        with lock:
+
+            processo = subprocess.Popen(
+                ["mpg123", arquivo]
+            )
+
+        processo.wait()
+
+        if cancelar.is_set():
+            return
+
+
+def tocar_audio(arquivo):
+
+    tocar_sequencia([arquivo])
+
+
+def tocar_sequencia(lista):
+
+    global processo
+    global thread_audio
+
+    cancelar.set()
+
+    with lock:
+
+        if processo and processo.poll() is None:
+
+            processo.terminate()
+
+            processo.wait()
+
+    if thread_audio and thread_audio.is_alive():
+
+        thread_audio.join()
+
+    thread_audio = threading.Thread(
+
+        target=_executar,
+
+        args=(lista,),
+
+        daemon=True
+
     )
 
-
-    return audio_atual
+    thread_audio.start()

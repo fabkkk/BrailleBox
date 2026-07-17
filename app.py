@@ -1,17 +1,28 @@
 from flask import Flask, render_template, request, jsonify
-from braille import braille_map
-import subprocess
-
-def tocar_audio(caminho):
-
-    processo = subprocess.Popen(
-        ["mpg123", caminho]
-    )
-
-    return processo
+from audio import tocar_audio, tocar_sequencia
+import serial
+import time
 
 app = Flask(__name__)
 
+ESP_PORT = "/dev/ttyACM" // sddubstituir pelo caminho correto da porta serial do ESP
+ESP_BAUDRATE = 115200
+esp = None
+
+
+def obter_esp():
+    global esp
+
+    if esp is not None and esp.is_open:
+        return esp
+
+    try:
+        esp = serial.Serial(ESP_PORT, ESP_BAUDRATE, timeout=1)
+        time.sleep(2)
+        return esp
+    except serial.SerialException as erro:
+        print(f"Nao foi possivel conectar ao ESP em {ESP_PORT}: {erro}")
+        return None
 
 @app.route("/")
 def home():
@@ -21,31 +32,36 @@ def home():
 @app.route("/confirmar", methods=["POST"])
 def confirmar():
 
-    dados = request.json
+    print("=== ENTREI NA ROTA CONFIRMAR ===")
 
+    dados = request.json
     letra = dados["letra"]
 
-    tocar_audio(
-    f"audios/confirmacao/letra_{letra}.mp3"
-)
+    print("Letra:", letra)
 
+    tocar_audio(f"audios/confirmacao/letra_{letra}.mp3")
 
-    pontos = braille_map[letra]
+    esp_atual = obter_esp()
+    if esp_atual is None:
+        return jsonify({
+            "status": "erro",
+            "mensagem": "ESP nao conectado"
+        }), 503
 
+    # Abaixa a letra anterior
+    esp_atual.write(b"RESET\n")
+    esp_atual.flush()
 
-    print("Letra confirmada:", letra)
+    time.sleep(0.5)
 
-    print("Pontos Braille:", pontos)
+    # Forma a nova letra
+    esp_atual.write(f"{letra}\n".encode())
+    esp_atual.flush()
 
+    print("Enviei!")
 
     return jsonify({
-
-        "status": "sucesso",
-
-        "letra_recebida": letra,
-
-        "pontos": pontos
-
+        "status": "sucesso"
     })
 
 @app.route("/audio/<nome>", methods=["POST"])
@@ -58,34 +74,27 @@ def audio(nome):
         "espaco": "audios/sistema/confirmar_espaco.mp3"
     }
 
-
     if nome in arquivos:
-
         tocar_audio(arquivos[nome])
 
         return jsonify({
-            "status":"sucesso"
+            "status": "sucesso"
         })
 
-
     return jsonify({
-        "status":"erro"
+        "status": "erro"
     })
 
 @app.route("/selecionar/<letra>", methods=["POST"])
 def selecionar(letra):
 
-    processo = tocar_audio(
-        f"audios/selecao/select_{letra}.mp3"
-    )
+    tocar_sequencia([
 
-    processo.wait()
+        f"audios/selecao/select_{letra}.mp3",
 
-
-    tocar_audio(
         "audios/sistema/confirmar_espaco.mp3"
-    )
 
+    ])
 
     return jsonify({
         "status":"sucesso"

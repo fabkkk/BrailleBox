@@ -136,19 +136,14 @@ function selectLetter(letter){
 
     showBraille(letter);
 
+fetch(`/selecionar/${letter}`,{
+    method:"POST"
+})
+.then(()=>{
 
-    fetch(`/selecionar/${letter}`, {
-        method:"POST"
-    })
-    .then(() => {
+    shortcut.classList.add("show");
 
-        shortcut.classList.add("show");
-
-        fetch("/audio/espaco", {
-            method:"POST"
-        });
-
-    });
+});
 
 }
 
@@ -276,7 +271,7 @@ showToast(
 });
 
 showToast(
-    "Isso não é uma letra."
+    "Tecla inválida."
 );
 
 
